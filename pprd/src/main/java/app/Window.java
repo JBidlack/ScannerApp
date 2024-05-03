@@ -93,8 +93,11 @@ public class Window extends JFrame{
             importFile = openFile();
             if (importFile != null){
                 jtable = processFile(importFile);
+                jtable.setSize(new Dimension(initialW, initialH));
+                jtable.setVisible(true);
                 // panel.add(processFile(importFile));
-                panel.repaint();
+                revalidate();
+                repaint();
             }
         });
         quit.addActionListener(e -> {
@@ -202,10 +205,10 @@ public class Window extends JFrame{
             for (int j = 0; j<cols; j++){
                 Cell cell = nextRow.getCell(j);
                 if(cell != null){
-                    storage[i-3][j] = cell.toString();
+                    storage[i][j] = cell.toString();
                 }
                 else{
-                    storage[i-3][j] = "";
+                    storage[i][j] = "";
                 }
             }
         }
