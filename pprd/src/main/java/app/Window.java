@@ -46,7 +46,7 @@ public class Window extends JFrame{
     private int posH = (int) ((height/2) + (initialH/2))/2;
     private int posW = (int) ((width/2)-(initialW/2))/2;
 
-    private JTable jtable = null;
+    private JTable jtable;
     private JPanel panel = null;
     public File importFile = null;
     /**
@@ -60,16 +60,17 @@ public class Window extends JFrame{
 
     private void setup(){
 
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setResizable(true);
-        setSize(initialW, initialH);
-        setLocation(new Point(posH, posW));
-        setJMenuBar(menu());
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setResizable(true);
+        this.setSize(initialW, initialH);
+        this.setLocation(new Point(posH, posW));
+        this.setJMenuBar(menu());
 
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(panelLayout(), BorderLayout.CENTER);
+        this.getContentPane().setLayout(new BorderLayout());
+        this.getContentPane().add(panelLayout(), BorderLayout.CENTER);
         // setContentPane(panelLayout());
-        setVisible(true);
+        // this.pack();
+        this.setVisible(true);
     }
 
     private JMenuBar menu(){
@@ -92,9 +93,10 @@ public class Window extends JFrame{
         open.addActionListener(e -> {
             importFile = openFile();
             if (importFile != null){
-                jtable = processFile(importFile);
-                // panel.add(processFile(importFile));
-                panel.repaint();
+                processFile(importFile);
+                // panel.add(jtable);
+                panelLayout();
+                // panel.repaint();
             }
         });
         quit.addActionListener(e -> {
@@ -108,11 +110,9 @@ public class Window extends JFrame{
         // panel.setLayout(new BorderLayout());
         panel.setPreferredSize(new Dimension(initialW, initialH));
         // panel.setSize(initialW, initialH);
-        JScrollPane scroll = new JScrollPane();
         
-            scroll.setViewportView(jtable);
-        
-        panel.add(scroll);
+        panel.repaint();
+
 
         return panel;
     }
@@ -126,14 +126,17 @@ public class Window extends JFrame{
         
         try{
             chooser.setFileFilter(filter);
-            chooser.showOpenDialog(null);
+            int f = chooser.showOpenDialog(null);
+            // chooser.showOpenDialog(null);
             
-            File file = chooser.getSelectedFile();
-            if(file != null){
-                return file;
-            }
-            else{
-                throw new FileNotFoundException();
+            if (f == JFileChooser.APPROVE_OPTION){
+                File file = chooser.getSelectedFile();
+                if(file != null){
+                    return file;
+                }
+                else{
+                    throw new FileNotFoundException();
+                }
             }
         } 
         catch(FileNotFoundException fnf){
@@ -142,8 +145,8 @@ public class Window extends JFrame{
         return null;
     }
 
-    private JTable processFile(File excel){
-        JTable table = new JTable();
+    private void processFile(File excel){
+        
         Workbook book = null;
         Sheet sheet = null;
         try {
@@ -151,7 +154,7 @@ public class Window extends JFrame{
             if(file != null){
                 book = new XSSFWorkbook(file);
                 sheet = book.getSheetAt(0);
-                table = createTable(sheet);
+                createTable(sheet);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -166,12 +169,10 @@ public class Window extends JFrame{
                 }
             }
         }
-        return table;
     }
 
-    private JTable createTable(Sheet sheet){
+    private void createTable(Sheet sheet){
         int counter = 0;
-        JTable table = null;
         Map<Integer, ArrayList<String>> map = new HashMap<>();
 
         Row header = null;
@@ -188,41 +189,43 @@ public class Window extends JFrame{
         
         if(header == null){
             System.err.println("No header found");
-            return null;
-        }
-        int rows = sheet.getPhysicalNumberOfRows()-counter;
-        int cols = header.getPhysicalNumberOfCells();
+            return;
+        }else{
+            int rows = sheet.getPhysicalNumberOfRows()-(counter+1);
+            int cols = header.getPhysicalNumberOfCells();
 
-        Object[][] storage = new Object[rows][cols];
+            String[][] storage = new String[rows][cols];
 
-        int headerRow = header.getRowNum();
+            int headerRow = header.getRowNum();
 
-        for (int i = headerRow+1; i < sheet.getLastRowNum()-1; i++){
-            Row nextRow = sheet.getRow(i); 
-            for (int j = 0; j<cols; j++){
-                Cell cell = nextRow.getCell(j);
-                if(cell != null){
-                    storage[i-3][j] = cell.toString();
-                }
-                else{
-                    storage[i-3][j] = "";
+            for (int i = headerRow+2; i < sheet.getLastRowNum()-1; i++){
+                Row nextRow = sheet.getRow(i); 
+                for (int j = 0; j<cols; j++){
+                    Cell cell = nextRow.getCell(j);
+                    if(cell != null){
+                        storage[i-(headerRow+2)][j] = cell.toString();
+                    }
+                    else{
+                        storage[i-3][j] = "";
+                    }
                 }
             }
+
+            String[] head = new String[cols];
+            for (int a = 0; a < cols; a++){
+                head[a] = header.getCell(a).toString();
+            }
+            jtable = new JTable(storage, head);
+            jtable.setSize(new Dimension(300, 300));
+            JScrollPane scroll = new JScrollPane();
+            scroll.add(jtable);
+            scroll.setViewportView(jtable);
+            scroll.setSize(new Dimension(((initialW)/3)*2, (initialH/3)*2));
+            
+            panel.add(scroll, BorderLayout.CENTER);
+            // panel.add(jtable, BorderLayout.CENTER);
+            panel.revalidate();
+            panel.repaint();
         }
-
-        String[] head = new String[cols];
-        for (int a = 0; a < cols; a++){
-            head[a] = header.getCell(a).toString();
-        }
-
-        table = new JTable(storage, head);
-
-
-
-
-
-
-        return table;
     }
-
 }
