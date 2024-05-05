@@ -94,9 +94,6 @@ public class Window extends JFrame{
             importFile = openFile();
             if (importFile != null){
                 processFile(importFile);
-                // panel.add(jtable);
-                panelLayout();
-                // panel.repaint();
             }
         });
         quit.addActionListener(e -> {
@@ -107,12 +104,10 @@ public class Window extends JFrame{
 
     private JPanel panelLayout(){
         panel = new JPanel(new BorderLayout());
-        // panel.setLayout(new BorderLayout());
+
         panel.setPreferredSize(new Dimension(initialW, initialH));
-        // panel.setSize(initialW, initialH);
         
         panel.repaint();
-
 
         return panel;
     }
@@ -153,6 +148,7 @@ public class Window extends JFrame{
             FileInputStream file = new FileInputStream(excel);
             if(file != null){
                 book = new XSSFWorkbook(file);
+                
                 sheet = book.getSheetAt(0);
                 createTable(sheet);
             }
@@ -178,6 +174,7 @@ public class Window extends JFrame{
         Row header = null;
 
         for (Row row: sheet){
+            
             if(row.getLastCellNum() > 1){
                 header = row;
                 break;
@@ -196,7 +193,7 @@ public class Window extends JFrame{
 
             String[][] storage = new String[rows][cols];
 
-            int headerRow = header.getRowNum();
+            int headerRow = (header == null) ? 0 : header.getRowNum();
 
             for (int i = headerRow+2; i < sheet.getLastRowNum()-1; i++){
                 Row nextRow = sheet.getRow(i); 
@@ -220,6 +217,7 @@ public class Window extends JFrame{
             JScrollPane scroll = new JScrollPane();
             scroll.add(jtable);
             scroll.setViewportView(jtable);
+            
             scroll.setSize(new Dimension(((initialW)/3)*2, (initialH/3)*2));
             
             panel.add(scroll, BorderLayout.CENTER);
