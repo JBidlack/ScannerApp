@@ -108,6 +108,8 @@ public class Process {
                     list.add(storage[i-(headerRow+2)][j]);
                 }
                 if(list.get(1) != ""){
+// Instead of creating a hashmap of index/object, make a hashmap using tag # as the key and index as val?
+
                     map.put(i, list);
                 }
                 System.out.println(map.size());
