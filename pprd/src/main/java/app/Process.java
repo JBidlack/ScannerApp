@@ -64,6 +64,7 @@ public class Process {
 
     private void createTable(Sheet sheet, JPanel panel){
         int counter = 0;
+        String key = "";
         Map<Integer, ArrayList<String>> map = new HashMap<>();
 
         Row header = null;
@@ -76,6 +77,7 @@ public class Process {
             else{
                 counter++;
             }
+
         }
         
         if(header == null){
@@ -90,29 +92,25 @@ public class Process {
             int headerRow = (header == null) ? 0 : header.getRowNum();
 
             for (int i = headerRow+2; i < sheet.getLastRowNum()-1; i++){
+                ArrayList<String> list = new ArrayList<>();
                 Row nextRow = sheet.getRow(i); 
+
                 for (int j = 0; j<cols; j++){
                     Cell cell = nextRow.getCell(j);
+
                     if(cell != null){
-                        if(cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)){
-                            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-                            Date date = cell.getDateCellValue();
-                            String newDate = sdf.format(date); //sdf.format(date);
-                            
-                            storage[i-(headerRow+2)][j] = newDate;
-                        }
-                        else if(cell.getCellType() == CellType.NUMERIC){
-                            int value = (int) cell.getNumericCellValue();
-                            storage[i-(headerRow+2)][j] = String.valueOf(value);
-                        }
-                        else{
-                            storage[i-(headerRow+2)][j] = cell.toString();
-                        }
+                        storage[i-(headerRow+2)][j] = cellCheck(cell);
                     }
                     else{
                         storage[i-(headerRow+2)][j] = "";
                     }
+                    
+                    list.add(storage[i-(headerRow+2)][j]);
                 }
+                if(list.get(1) != ""){
+                    map.put(i, list);
+                }
+                System.out.println(map.size());
             }
 
             String[] head = new String[cols];
@@ -133,5 +131,26 @@ public class Process {
             panel.revalidate();
             panel.repaint();
         }
+    }
+
+    private String cellCheck(Cell cell){
+        String check = "";
+
+        if(cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)){
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            Date date = cell.getDateCellValue();
+            String newDate = sdf.format(date); //sdf.format(date);
+            
+            check = newDate;
+        }
+        else if(cell.getCellType() == CellType.NUMERIC){
+            int value = (int) cell.getNumericCellValue();
+            check = String.valueOf(value);
+        }
+        else{
+            check = cell.toString();
+        }
+
+        return check;
     }
 }

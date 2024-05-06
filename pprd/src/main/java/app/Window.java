@@ -98,22 +98,23 @@ public class Window extends JFrame{
 
     private JPanel panelLayout(){
         buttPan = new JPanel();
-        JButton undo = new JButton("Undo");
         
+        JButton undo = new JButton("Undo");
         JButton expButton = new JButton("Export");
         buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
+
         buttPan.add(Box.createRigidArea(new Dimension(100, 40)));
         buttPan.add(undo);
         buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
         buttPan.add(expButton);
+        buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
+
         undo.setAlignmentX(CENTER_ALIGNMENT);
         expButton.setAlignmentX(CENTER_ALIGNMENT);
-        buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
+
         panel = new JPanel(new BorderLayout());
         panel.add(buttPan, BorderLayout.EAST);
-
         panel.setPreferredSize(new Dimension(initialW, initialH));
-        
         panel.repaint();
 
         return panel;
