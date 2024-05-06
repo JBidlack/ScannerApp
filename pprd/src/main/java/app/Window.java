@@ -7,32 +7,26 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
+import org.apache.logging.log4j.core.config.builder.api.Component;
 import org.apache.logging.log4j.simple.SimpleLogger;
 import org.apache.logging.log4j.util.PropertiesUtil;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 
 public class Window extends JFrame{
@@ -45,9 +39,8 @@ public class Window extends JFrame{
     private int initialW = (int) width/2;
     private int posH = (int) ((height/2) + (initialH/2))/2;
     private int posW = (int) ((width/2)-(initialW/2))/2;
-
-    private JTable jtable;
     private JPanel panel = null;
+    private JPanel buttPan = null;
     public File importFile = null;
     /**
 	 * 
@@ -93,7 +86,8 @@ public class Window extends JFrame{
         open.addActionListener(e -> {
             importFile = openFile();
             if (importFile != null){
-                processFile(importFile);
+                Process p = new Process();
+                p.process(importFile, panel);
             }
         });
         quit.addActionListener(e -> {
@@ -103,7 +97,20 @@ public class Window extends JFrame{
     }
 
     private JPanel panelLayout(){
+        buttPan = new JPanel();
+        JButton undo = new JButton("Undo");
+        
+        JButton expButton = new JButton("Export");
+        buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
+        buttPan.add(Box.createRigidArea(new Dimension(100, 40)));
+        buttPan.add(undo);
+        buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
+        buttPan.add(expButton);
+        undo.setAlignmentX(CENTER_ALIGNMENT);
+        expButton.setAlignmentX(CENTER_ALIGNMENT);
+        buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
         panel = new JPanel(new BorderLayout());
+        panel.add(buttPan, BorderLayout.EAST);
 
         panel.setPreferredSize(new Dimension(initialW, initialH));
         
@@ -111,6 +118,9 @@ public class Window extends JFrame{
 
         return panel;
     }
+    // private JPanel buttonPanel(){
+    //     buttPan = new 
+    // }
 
     private File openFile(){
         // String startingPath = System.getProperty("user.home") + "\\Desktop";
@@ -138,92 +148,5 @@ public class Window extends JFrame{
             log.error(fnf.getLocalizedMessage());
         }    
         return null;
-    }
-
-    private void processFile(File excel){
-        
-        Workbook book = null;
-        Sheet sheet = null;
-        try {
-            FileInputStream file = new FileInputStream(excel);
-            if(file != null){
-                book = new XSSFWorkbook(file);
-                
-                sheet = book.getSheetAt(0);
-                createTable(sheet);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        finally{
-            if(book != null){
-                try {
-                    book.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-    }
-
-    private void createTable(Sheet sheet){
-        int counter = 0;
-        Map<Integer, ArrayList<String>> map = new HashMap<>();
-
-        Row header = null;
-
-        for (Row row: sheet){
-            
-            if(row.getLastCellNum() > 1){
-                header = row;
-                break;
-            }
-            else{
-                counter++;
-            }
-        }
-        
-        if(header == null){
-            System.err.println("No header found");
-            return;
-        }else{
-            int rows = sheet.getPhysicalNumberOfRows()-(counter+1);
-            int cols = header.getPhysicalNumberOfCells();
-
-            String[][] storage = new String[rows][cols];
-
-            int headerRow = (header == null) ? 0 : header.getRowNum();
-
-            for (int i = headerRow+2; i < sheet.getLastRowNum()-1; i++){
-                Row nextRow = sheet.getRow(i); 
-                for (int j = 0; j<cols; j++){
-                    Cell cell = nextRow.getCell(j);
-                    if(cell != null){
-                        storage[i-(headerRow+2)][j] = cell.toString();
-                    }
-                    else{
-                        storage[i-3][j] = "";
-                    }
-                }
-            }
-
-            String[] head = new String[cols];
-            for (int a = 0; a < cols; a++){
-                head[a] = header.getCell(a).toString();
-            }
-            jtable = new JTable(storage, head);
-            jtable.setSize(new Dimension(300, 300));
-            JScrollPane scroll = new JScrollPane();
-            scroll.add(jtable);
-            scroll.setViewportView(jtable);
-            
-            scroll.setSize(new Dimension(((initialW)/3)*2, (initialH/3)*2));
-            
-            panel.add(scroll, BorderLayout.CENTER);
-            // panel.add(jtable, BorderLayout.CENTER);
-            panel.revalidate();
-            panel.repaint();
-        }
     }
 }
