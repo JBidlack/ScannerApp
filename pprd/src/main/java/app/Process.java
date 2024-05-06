@@ -64,8 +64,7 @@ public class Process {
 
     private void createTable(Sheet sheet, JPanel panel){
         int counter = 0;
-        String key = "";
-        Map<Integer, ArrayList<String>> map = new HashMap<>();
+        Map<String, Integer> map = new HashMap<>();
 
         Row header = null;
 
@@ -77,7 +76,6 @@ public class Process {
             else{
                 counter++;
             }
-
         }
         
         if(header == null){
@@ -109,8 +107,8 @@ public class Process {
                 }
                 if(list.get(1) != ""){
 // Instead of creating a hashmap of index/object, make a hashmap using tag # as the key and index as val?
-
-                    map.put(i, list);
+                    String tag = list.get(1);
+                    map.put(tag, i);
                 }
                 System.out.println(map.size());
             }
