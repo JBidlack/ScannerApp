@@ -106,11 +106,9 @@ public class Process {
                     list.add(storage[i-(headerRow+2)][j]);
                 }
                 if(list.get(1) != ""){
-// Instead of creating a hashmap of index/object, make a hashmap using tag # as the key and index as val?
                     String tag = list.get(1);
                     map.put(tag, i);
                 }
-                System.out.println(map.size());
             }
 
             String[] head = new String[cols];
@@ -139,7 +137,7 @@ public class Process {
         if(cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)){
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
             Date date = cell.getDateCellValue();
-            String newDate = sdf.format(date); //sdf.format(date);
+            String newDate = sdf.format(date); 
             
             check = newDate;
         }

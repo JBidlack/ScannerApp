@@ -1,6 +1,7 @@
 package app;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -14,11 +15,13 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
@@ -41,6 +44,7 @@ public class Window extends JFrame{
     private int posW = (int) ((width/2)-(initialW/2))/2;
     private JPanel panel = null;
     private JPanel buttPan = null;
+    private JPanel inputPan = null;
     public File importFile = null;
     /**
 	 * 
@@ -98,11 +102,16 @@ public class Window extends JFrame{
 
     private JPanel panelLayout(){
         buttPan = new JPanel();
-        
+        inputPan = new JPanel();
+        JLabel scanLabel = new JLabel("Scanned Tag: ");
+        JTextField scanInfo = new JTextField();
+
         JButton undo = new JButton("Undo");
         JButton expButton = new JButton("Export");
         buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
-
+        inputPan.setLayout(new BoxLayout(inputPan, BoxLayout.X_AXIS));
+        inputPan.add(scanLabel);
+        inputPan.add(scanInfo);
         buttPan.add(Box.createRigidArea(new Dimension(100, 40)));
         buttPan.add(undo);
         buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
@@ -113,6 +122,7 @@ public class Window extends JFrame{
         expButton.setAlignmentX(CENTER_ALIGNMENT);
 
         panel = new JPanel(new BorderLayout());
+        panel.add(inputPan, BorderLayout.NORTH);
         panel.add(buttPan, BorderLayout.EAST);
         panel.setPreferredSize(new Dimension(initialW, initialH));
         panel.repaint();
