@@ -25,7 +25,7 @@ public class Scanner {
         
     }
 
-    private static UsbDevice finDevice(UsbHub root){
+    private static UsbDevice findDevice(UsbHub root){
 
         return null;
     }
