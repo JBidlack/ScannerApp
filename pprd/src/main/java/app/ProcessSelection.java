@@ -27,9 +27,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 /**
  * Process
  */
-public class Process {
+public class ProcessSelection {
 
-    public Process(){
+    public ProcessSelection(){
 
     }
     public void process(File  excel, JPanel panel){
@@ -133,6 +133,7 @@ public class Process {
 
     private String cellCheck(Cell cell){
         String check = "";
+        Process process = Runtime.getRuntime().exec(adbCommand);
 
         if(cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)){
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
