@@ -88,7 +88,7 @@ public class Window extends JFrame{
         open.addActionListener(e -> {
             importFile = openFile();
             if (importFile != null){
-                Process p = new Process();
+                ProcessSelection p = new ProcessSelection();
                 p.process(importFile, panel);
             }
         });

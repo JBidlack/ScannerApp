@@ -21,7 +21,7 @@ public class Scanner {
 
             UsbDevice scanner = findDevice(root);
 
-            scanner.addUsbDeviceListener(l -> );
+            // scanner.addUsbDeviceListener(l -> );
 
         } catch (SecurityException e) {
             // TODO Auto-generated catch block
