@@ -20,13 +20,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
-import org.apache.logging.log4j.core.config.builder.api.Component;
 import org.apache.logging.log4j.simple.SimpleLogger;
 import org.apache.logging.log4j.util.PropertiesUtil;
 
@@ -103,15 +101,20 @@ public class Window extends JFrame{
     private JPanel panelLayout(){
         buttPan = new JPanel();
         inputPan = new JPanel();
+
         JLabel scanLabel = new JLabel("Scanned Tag: ");
         JTextField scanInfo = new JTextField();
-
         JButton undo = new JButton("Undo");
         JButton expButton = new JButton("Export");
+
         buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
         inputPan.setLayout(new BoxLayout(inputPan, BoxLayout.X_AXIS));
         inputPan.add(scanLabel);
         inputPan.add(scanInfo);
+
+        scanInfo.addActionListener(e -> {
+            
+        });
         buttPan.add(Box.createRigidArea(new Dimension(100, 40)));
         buttPan.add(undo);
         buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
@@ -129,9 +132,7 @@ public class Window extends JFrame{
 
         return panel;
     }
-    // private JPanel buttonPanel(){
-    //     buttPan = new 
-    // }
+
 
     private File openFile(){
         // String startingPath = System.getProperty("user.home") + "\\Desktop";
