@@ -1,38 +1,33 @@
 package app;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 
 import org.apache.logging.log4j.simple.SimpleLogger;
 import org.apache.logging.log4j.util.PropertiesUtil;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 
 public class Window extends JFrame{
@@ -45,9 +40,9 @@ public class Window extends JFrame{
     private int initialW = (int) width/2;
     private int posH = (int) ((height/2) + (initialH/2))/2;
     private int posW = (int) ((width/2)-(initialW/2))/2;
-
-    private JTable jtable;
     private JPanel panel = null;
+    private JPanel buttPan = null;
+    private JPanel inputPan = null;
     public File importFile = null;
     /**
 	 * 
@@ -93,10 +88,8 @@ public class Window extends JFrame{
         open.addActionListener(e -> {
             importFile = openFile();
             if (importFile != null){
-                processFile(importFile);
-                // panel.add(jtable);
-                panelLayout();
-                // panel.repaint();
+                ProcessSelection p = new ProcessSelection();
+                p.process(importFile, panel);
             }
         });
         quit.addActionListener(e -> {
@@ -106,16 +99,40 @@ public class Window extends JFrame{
     }
 
     private JPanel panelLayout(){
-        panel = new JPanel(new BorderLayout());
-        // panel.setLayout(new BorderLayout());
-        panel.setPreferredSize(new Dimension(initialW, initialH));
-        // panel.setSize(initialW, initialH);
-        
-        panel.repaint();
+        buttPan = new JPanel();
+        inputPan = new JPanel();
 
+        JLabel scanLabel = new JLabel("Scanned Tag: ");
+        JTextField scanInfo = new JTextField();
+        JButton undo = new JButton("Undo");
+        JButton expButton = new JButton("Export");
+
+        buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
+        inputPan.setLayout(new BoxLayout(inputPan, BoxLayout.X_AXIS));
+        inputPan.add(scanLabel);
+        inputPan.add(scanInfo);
+
+        scanInfo.addActionListener(e -> {
+            
+        });
+        buttPan.add(Box.createRigidArea(new Dimension(100, 40)));
+        buttPan.add(undo);
+        buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
+        buttPan.add(expButton);
+        buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
+
+        undo.setAlignmentX(CENTER_ALIGNMENT);
+        expButton.setAlignmentX(CENTER_ALIGNMENT);
+
+        panel = new JPanel(new BorderLayout());
+        panel.add(inputPan, BorderLayout.NORTH);
+        panel.add(buttPan, BorderLayout.EAST);
+        panel.setPreferredSize(new Dimension(initialW, initialH));
+        panel.repaint();
 
         return panel;
     }
+
 
     private File openFile(){
         // String startingPath = System.getProperty("user.home") + "\\Desktop";
@@ -144,6 +161,7 @@ public class Window extends JFrame{
         }    
         return null;
     }
+<<<<<<< HEAD
 
     private void processFile(File excel){
         
@@ -228,4 +246,6 @@ public class Window extends JFrame{
             panel.repaint();
         }
     }
+=======
+>>>>>>> 3296f021e53d554f4629a002f0752f0d21cc9176
 }
