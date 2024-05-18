@@ -24,6 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
+import javax.usb.UsbDevice;
 
 import org.apache.logging.log4j.simple.SimpleLogger;
 import org.apache.logging.log4j.util.PropertiesUtil;
@@ -40,20 +41,27 @@ public class Window extends JFrame{
     private int initialW = (int) width/2;
     private int posH = (int) ((height/2) + (initialH/2))/2;
     private int posW = (int) ((width/2)-(initialW/2))/2;
+    private int attempt = 0;
     private JPanel panel = null;
     private JPanel buttPan = null;
     private JPanel inputPan = null;
     public File importFile = null;
+
+    private Scanner scanner = null;
+    // private UsbDevice scanner =null;
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
 	public Window(){
-        setup();
+        
+    }
+    public void setup(){
+        setupMain();
     }
 
-    private void setup(){
+    private void setupMain(){
 
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setResizable(true);
@@ -63,6 +71,7 @@ public class Window extends JFrame{
 
         this.getContentPane().setLayout(new BorderLayout());
         this.getContentPane().add(panelLayout(), BorderLayout.CENTER);
+        scanner = new Scanner();
         // setContentPane(panelLayout());
         // this.pack();
         this.setVisible(true);
@@ -75,6 +84,7 @@ public class Window extends JFrame{
         JMenu file = new JMenu("File");
         JMenuItem open = new JMenuItem("Open File");
         JMenuItem quit = new JMenuItem("Quit");
+        
         file.setFont(menuFont);
         open.setFont(menuFont);
         quit.setFont(menuFont);
@@ -88,14 +98,27 @@ public class Window extends JFrame{
         open.addActionListener(e -> {
             importFile = openFile();
             if (importFile != null){
-                ProcessSelection p = new ProcessSelection();
-                p.process(importFile, panel);
+                if(scanner == null && attempt < 3){
+                    scanner = new Scanner();
+                    attempt++;
+                }
+                if(scanner == null && attempt>=3){
+                    JLabel label = new JLabel("No Device Found", panel.getWidth()/2);
+                    panel.add(label);
+                }
+                if(scanner != null){
+                    ProcessSelection p = new ProcessSelection();
+                    p.process(importFile, panel);
+                }
             }
         });
         quit.addActionListener(e -> {
             System.exit(0);
         });
         return menu;
+    }
+    public void getPanelLayout(){
+        panelLayout();
     }
 
     private JPanel panelLayout(){
@@ -161,91 +184,10 @@ public class Window extends JFrame{
         }    
         return null;
     }
-<<<<<<< HEAD
-
-    private void processFile(File excel){
-        
-        Workbook book = null;
-        Sheet sheet = null;
-        try {
-            FileInputStream file = new FileInputStream(excel);
-            if(file != null){
-                book = new XSSFWorkbook(file);
-                sheet = book.getSheetAt(0);
-                createTable(sheet);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        finally{
-            if(book != null){
-                try {
-                    book.close();
-                } catch (IOException e) {
-                }
-            }
-        }
+    public JPanel getPanel() {
+        return panel;
     }
-
-    private void createTable(Sheet sheet){
-        int counter = 0;
-        Map<Integer, ArrayList<String>> map = new HashMap<>();
-
-        Row header = null;
-
-        for (Row row: sheet){
-            if(row.getLastCellNum() > 1){
-                header = row;
-                break;
-            }
-            else{
-                counter++;
-            }
-        }
-        
-        if(header == null){
-            System.err.println("No header found");
-            return;
-        }else{
-            int rows = sheet.getPhysicalNumberOfRows()-(counter+1);
-            int cols = header.getPhysicalNumberOfCells();
-
-            String[][] storage = new String[rows][cols];
-
-            int headerRow = header.getRowNum();
-
-            for (int i = headerRow+2; i < sheet.getLastRowNum()-1; i++){
-                Row nextRow = sheet.getRow(i); 
-                for (int j = 0; j<cols; j++){
-                    Cell cell = nextRow.getCell(j);
-                    if(cell != null){
-                        storage[i-(headerRow+1)][j] = cell.toString();
-                    }
-                    else{
-                        storage[i-3][j] = "";
-                    }
-                }
-            }
-
-            String[] head = new String[cols];
-            for (int a = 0; a < cols; a++){
-                head[a] = header.getCell(a).toString();
-            }
-            jtable = new JTable(storage, head);
-            jtable.setSize(new Dimension(300, 300));
-            JScrollPane scroll = new JScrollPane();
-            scroll.add(jtable);
-            scroll.setViewportView(jtable);
-            scroll.setSize(new Dimension(((initialW)/3)*2, (initialH/3)*2));
-            
-            panel.add(scroll, BorderLayout.CENTER);
-            // panel.add(jtable, BorderLayout.CENTER);
-            panel.revalidate();
-            panel.repaint();
-        }
+    public void setPanel(JPanel panel) {
+        this.panel = panel;
     }
-=======
->>>>>>> 3296f021e53d554f4629a002f0752f0d21cc9176
 }

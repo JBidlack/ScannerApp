@@ -2,6 +2,7 @@ package app;
 
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
@@ -12,14 +13,17 @@ import javax.usb.UsbServices;
 public class Scanner {
     private static final short VID = 0x18D1;
     private static final short PID = 0x4EE7;
+    private static Window window = new Window();
+    protected static UsbDevice scanner = null;
+    private static UsbHub root = null;
 
     public Scanner(){
         try {
             UsbServices service = UsbHostManager.getUsbServices();
 
-            UsbHub root = service.getRootUsbHub();
+            root = service.getRootUsbHub();
 
-            UsbDevice scanner = findDevice(root);
+            scanner = findDevice(root);
 
             // scanner.addUsbDeviceListener(l -> );
 
@@ -33,8 +37,9 @@ public class Scanner {
         
     }
 
+    @SuppressWarnings("unchecked")
     private static UsbDevice findDevice(UsbHub root){
-        UsbDevice scanner = null;
+        //UsbDevice scanner = null;
 
         for (UsbDevice device: (List<UsbDevice>) root.getAttachedUsbDevices()){
             if(device.isUsbHub()){
@@ -50,7 +55,10 @@ public class Scanner {
                     scanner = device;
                     break;
                 }
+                JLabel label = new JLabel("No Device Found", window.getPanel().getWidth()/2);
+                window.getPanel().add(label);
             }
+
         }
         return scanner;
     }  
