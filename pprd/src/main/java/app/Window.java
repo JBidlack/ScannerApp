@@ -203,7 +203,7 @@ public class Window extends JFrame{
                 for (int j = 0; j<cols; j++){
                     Cell cell = nextRow.getCell(j);
                     if(cell != null){
-                        storage[i-(headerRow+2)][j] = cell.toString();
+                        storage[i-(headerRow+1)][j] = cell.toString();
                     }
                     else{
                         storage[i-3][j] = "";
