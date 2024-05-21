@@ -71,7 +71,7 @@ public class Window extends JFrame{
 
         this.getContentPane().setLayout(new BorderLayout());
         this.getContentPane().add(panelLayout(), BorderLayout.CENTER);
-        scanner = new Scanner();
+        
         // setContentPane(panelLayout());
         // this.pack();
         this.setVisible(true);
@@ -119,6 +119,7 @@ public class Window extends JFrame{
     }
     public void getPanelLayout(){
         panelLayout();
+        scanner = new Scanner();
     }
 
     private JPanel panelLayout(){
@@ -151,6 +152,8 @@ public class Window extends JFrame{
         panel.add(inputPan, BorderLayout.NORTH);
         panel.add(buttPan, BorderLayout.EAST);
         panel.setPreferredSize(new Dimension(initialW, initialH));
+        
+
         panel.repaint();
 
         return panel;

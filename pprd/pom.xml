@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
     <groupId>app</groupId>
     <artifactId>pprd</artifactId>
@@ -38,6 +38,11 @@
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
             <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.usb</groupId>
+            <artifactId>usb-api</artifactId>
+            <version>1.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.usb4java</groupId>

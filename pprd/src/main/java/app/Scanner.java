@@ -1,8 +1,11 @@
 package app;
 
+import java.awt.Panel;
 import java.util.List;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
@@ -25,6 +28,10 @@ public class Scanner {
 
             scanner = findDevice(root);
 
+            if( scanner == null){
+                noDeviceFound();
+            }
+
             // scanner.addUsbDeviceListener(l -> );
 
         } catch (SecurityException e) {
@@ -38,10 +45,10 @@ public class Scanner {
     }
 
     @SuppressWarnings("unchecked")
-    private static UsbDevice findDevice(UsbHub root){
+    private static UsbDevice findDevice(UsbHub hub){
         //UsbDevice scanner = null;
 
-        for (UsbDevice device: (List<UsbDevice>) root.getAttachedUsbDevices()){
+        for (UsbDevice device: (List<UsbDevice>) hub.getAttachedUsbDevices()){
             if(device.isUsbHub()){
                 scanner = findDevice((UsbHub) device);
                 if(scanner != null){
@@ -55,11 +62,24 @@ public class Scanner {
                     scanner = device;
                     break;
                 }
-                JLabel label = new JLabel("No Device Found", window.getPanel().getWidth()/2);
-                window.getPanel().add(label);
             }
 
         }
-        return scanner;
+        return null;
     }  
+
+    private void noDeviceFound(){
+        
+        SwingUtilities.invokeLater(() -> {
+            if (window != null && window.getPanel() != null) {
+            JLabel label = new JLabel("No Device Found", JLabel.CENTER);
+            JPanel panel = window.getPanel();
+            panel.add(label);
+            panel.revalidate();
+            panel.repaint();
+        } else {
+            System.err.println("Window or panel is null" + window + " PPPPPPPPPPPPPPP " + window.getPanel());
+        }
+    });
+    }
 }
