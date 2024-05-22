@@ -1,11 +1,7 @@
 package app;
 
-import java.awt.Panel;
 import java.util.List;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbException;
@@ -16,7 +12,6 @@ import javax.usb.UsbServices;
 public class Scanner {
     private static final short VID = 0x18D1;
     private static final short PID = 0x4EE7;
-    private static Window window = new Window();
     protected static UsbDevice scanner = null;
     private static UsbHub root = null;
 
@@ -28,10 +23,6 @@ public class Scanner {
 
             scanner = findDevice(root);
 
-            if( scanner == null){
-                noDeviceFound();
-            }
-
             // scanner.addUsbDeviceListener(l -> );
 
         } catch (SecurityException e) {
@@ -42,6 +33,11 @@ public class Scanner {
             e.printStackTrace();
         }
         
+    }
+    public UsbDevice retryFind(){
+
+        findDevice(root);
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -68,18 +64,20 @@ public class Scanner {
         return null;
     }  
 
-    private void noDeviceFound(){
+    // private void noDeviceFound(){
         
-        SwingUtilities.invokeLater(() -> {
-            if (window != null && window.getPanel() != null) {
-            JLabel label = new JLabel("No Device Found", JLabel.CENTER);
-            JPanel panel = window.getPanel();
-            panel.add(label);
-            panel.revalidate();
-            panel.repaint();
-        } else {
-            System.err.println("Window or panel is null" + window + " PPPPPPPPPPPPPPP " + window.getPanel());
-        }
-    });
-    }
+    //     SwingUtilities.invokeLater(() -> {
+    //         if (window != null && window.getPanel() != null) {
+    //         JLabel label = new JLabel("No Device Found", JLabel.CENTER);
+    //         JPanel panel = window.getPanel();
+    //         panel.add(label);
+            
+    //         panel.revalidate();
+    //         panel.repaint();
+    //         window.setPanel(panel);
+    //     } else {
+    //         System.err.println("Window or panel is null" + window + " PPPPPPPPPPPPPPP " + window.getPanel());
+    //     }
+    // });
+    // }
 }

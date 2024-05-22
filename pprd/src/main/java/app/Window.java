@@ -47,7 +47,7 @@ public class Window extends JFrame{
     private JPanel inputPan = null;
     public File importFile = null;
 
-    private Scanner scanner = null;
+    private Scanner device = new Scanner();
     // private UsbDevice scanner =null;
     /**
 	 * 
@@ -96,17 +96,17 @@ public class Window extends JFrame{
         menu.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
         open.addActionListener(e -> {
+            
             importFile = openFile();
             if (importFile != null){
-                if(scanner == null && attempt < 3){
-                    scanner = new Scanner();
-                    attempt++;
+                if(device.scanner == null){
+                    while(attempt <= 3 && device.scanner == null){
+                        device.retryFind();
+                        attempt++;
+                    }
+                    noDeviceFound();
                 }
-                if(scanner == null && attempt>=3){
-                    JLabel label = new JLabel("No Device Found", panel.getWidth()/2);
-                    panel.add(label);
-                }
-                if(scanner != null){
+                if(Scanner.scanner != null){
                     ProcessSelection p = new ProcessSelection();
                     p.process(importFile, panel);
                 }
@@ -117,24 +117,23 @@ public class Window extends JFrame{
         });
         return menu;
     }
-    public void getPanelLayout(){
-        panelLayout();
-        scanner = new Scanner();
-    }
 
     private JPanel panelLayout(){
         buttPan = new JPanel();
         inputPan = new JPanel();
-
+        device.retryFind();
+        
         JLabel scanLabel = new JLabel("Scanned Tag: ");
-        JTextField scanInfo = new JTextField();
+        JTextField scanInfo = new JTextField(20);
         JButton undo = new JButton("Undo");
         JButton expButton = new JButton("Export");
 
         buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
         inputPan.setLayout(new BoxLayout(inputPan, BoxLayout.X_AXIS));
+        // scanInfo.setm
         inputPan.add(scanLabel);
         inputPan.add(scanInfo);
+        
 
         scanInfo.addActionListener(e -> {
             
@@ -152,9 +151,9 @@ public class Window extends JFrame{
         panel.add(inputPan, BorderLayout.NORTH);
         panel.add(buttPan, BorderLayout.EAST);
         panel.setPreferredSize(new Dimension(initialW, initialH));
-        
+        noDeviceFound();
 
-        panel.repaint();
+        // panel.repaint();
 
         return panel;
     }
@@ -187,6 +186,17 @@ public class Window extends JFrame{
         }    
         return null;
     }
+
+    private void noDeviceFound(){
+
+        if(device.scanner == null){
+            JLabel label = new JLabel("No Device Found", JLabel.CENTER);
+            panel.add(label);
+            panel.revalidate();
+            panel.repaint();
+        }
+    }
+
     public JPanel getPanel() {
         return panel;
     }
