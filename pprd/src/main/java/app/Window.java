@@ -45,6 +45,7 @@ public class Window extends JFrame{
     private JPanel panel = null;
     private JPanel buttPan = null;
     private JPanel inputPan = null;
+    private JPanel notice = null;
     public File importFile = null;
 
     private Scanner device = new Scanner();
@@ -96,7 +97,8 @@ public class Window extends JFrame{
         menu.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
         open.addActionListener(e -> {
-            
+            ProcessSelection p = new ProcessSelection();
+            JLabel label = new JLabel("No Device Connected", JLabel.CENTER);
             importFile = openFile();
             if (importFile != null){
                 if(device.scanner == null){
@@ -104,10 +106,12 @@ public class Window extends JFrame{
                         device.retryFind();
                         attempt++;
                     }
-                    noDeviceFound();
+                    notice.removeAll();
+                    notice.add(label);
+                    p.process(importFile, panel);
                 }
                 if(Scanner.scanner != null){
-                    ProcessSelection p = new ProcessSelection();
+                    // ProcessSelection p = new ProcessSelection();
                     p.process(importFile, panel);
                 }
             }
@@ -121,6 +125,7 @@ public class Window extends JFrame{
     private JPanel panelLayout(){
         buttPan = new JPanel();
         inputPan = new JPanel();
+        notice = new JPanel();
         device.retryFind();
         
         JLabel scanLabel = new JLabel("Scanned Tag: ");
@@ -130,6 +135,7 @@ public class Window extends JFrame{
 
         buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
         inputPan.setLayout(new BoxLayout(inputPan, BoxLayout.X_AXIS));
+        notice.setLayout(new BoxLayout(notice, BoxLayout.X_AXIS));
         // scanInfo.setm
         inputPan.add(scanLabel);
         inputPan.add(scanInfo);
@@ -149,6 +155,7 @@ public class Window extends JFrame{
 
         panel = new JPanel(new BorderLayout());
         panel.add(inputPan, BorderLayout.NORTH);
+        panel.add(notice, BorderLayout.SOUTH);
         panel.add(buttPan, BorderLayout.EAST);
         panel.setPreferredSize(new Dimension(initialW, initialH));
         noDeviceFound();
@@ -191,7 +198,7 @@ public class Window extends JFrame{
 
         if(device.scanner == null){
             JLabel label = new JLabel("No Device Found", JLabel.CENTER);
-            panel.add(label);
+            notice.add(label);
             panel.revalidate();
             panel.repaint();
         }

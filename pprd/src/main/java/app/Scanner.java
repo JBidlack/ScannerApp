@@ -63,21 +63,4 @@ public class Scanner {
         }
         return null;
     }  
-
-    // private void noDeviceFound(){
-        
-    //     SwingUtilities.invokeLater(() -> {
-    //         if (window != null && window.getPanel() != null) {
-    //         JLabel label = new JLabel("No Device Found", JLabel.CENTER);
-    //         JPanel panel = window.getPanel();
-    //         panel.add(label);
-            
-    //         panel.revalidate();
-    //         panel.repaint();
-    //         window.setPanel(panel);
-    //     } else {
-    //         System.err.println("Window or panel is null" + window + " PPPPPPPPPPPPPPP " + window.getPanel());
-    //     }
-    // });
-    // }
 }
