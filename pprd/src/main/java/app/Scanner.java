@@ -35,6 +35,14 @@ public class Scanner {
             configuration = scanner.getActiveUsbConfiguration();
             usbInterface = configuration.getUsbInterface((byte) 0);
 
+            usbInterface.claim(new UsbInterfacePolicy() {
+                @Override
+                public boolean forceClaim(UsbInterface usbInterface) {
+                    return true;
+                }
+            });
+
+
 
         } catch (SecurityException e) {
             // TODO Auto-generated catch block
