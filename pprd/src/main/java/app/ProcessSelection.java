@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -28,6 +29,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * Process
  */
 public class ProcessSelection {
+    private static Map<String, Integer> map = null;
+    private static JTable jtable = null;
 
     public ProcessSelection(){
 
@@ -35,6 +38,12 @@ public class ProcessSelection {
     public void process(File  excel, JPanel panel){
         processFile(excel, panel);
     }
+
+    // public void clearTable(JPanel panel){
+    //     if(jtable != null){
+    //         jtable = null;
+    //     }
+    // }
 
     private void processFile(File excel, JPanel panel){
         
@@ -64,9 +73,12 @@ public class ProcessSelection {
 
     private void createTable(Sheet sheet, JPanel panel){
         int counter = 0;
-        Map<String, Integer> map = new HashMap<>();
-
+        map = new HashMap<>();
         Row header = null;
+
+        // if(jtable != null){
+        //     jtable.removeAll();
+        // }
 
         for (Row row: sheet){
             if(row.getLastCellNum() > 1){
@@ -90,7 +102,6 @@ public class ProcessSelection {
             int headerRow = (header == null) ? 0 : header.getRowNum();
 
             for (int i = headerRow+2; i < sheet.getLastRowNum()-1; i++){
-                ArrayList<String> list = new ArrayList<>();
                 Row nextRow = sheet.getRow(i); 
 
                 for (int j = 0; j<cols; j++){
@@ -102,27 +113,37 @@ public class ProcessSelection {
                     else{
                         storage[i-(headerRow+2)][j] = "";
                     }
-                    
-                    list.add(storage[i-(headerRow+2)][j]);
-                }
-                if(list.get(1) != ""){
-                    String tag = list.get(1);
-                    map.put(tag, i);
                 }
             }
 
+            jtable = new JTable();
             String[] head = new String[cols];
+
             for (int a = 0; a < cols; a++){
                 head[a] = header.getCell(a).toString();
             }
-            JTable jtable = new JTable(storage, head);
-            jtable.setSize(new Dimension(300, 300));
+            DefaultTableModel model = new DefaultTableModel(storage, head){
+                @Override
+                public boolean isCellEditable(int row, int column){
+                    return false;
+                }
+            };
+            jtable.setModel(model); 
+
+            for (int r = 0; r< jtable.getRowCount(); r++){
+                String value = String.valueOf(jtable.getValueAt(r, 1));
+                if(jtable.getValueAt(r, 1) != ""){
+                    map.put(value, r);
+                }
+            }
+            
             
             JScrollPane scroll = new JScrollPane();
             scroll.add(jtable);
             scroll.setViewportView(jtable);
             
             scroll.setSize(new Dimension(((panel.getWidth())/3)*2, (panel.getHeight()/3)*2));
+            // jtable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             
             panel.add(scroll, BorderLayout.CENTER);
             // panel.add(jtable, BorderLayout.CENTER);
@@ -151,5 +172,23 @@ public class ProcessSelection {
         }
 
         return check;
+    }
+
+    public static void search(String item){
+        itemSearch(item);
+    }
+
+    private static void itemSearch(String item){
+        int rowNum = 0;
+        
+        if(map != null){
+            if(map.containsKey(item)){
+                rowNum = map.get(item);
+                Object items = jtable.getValueAt(rowNum, jtable.getColumnCount()-1);
+                int value = Integer.valueOf(String.valueOf(items));
+                jtable.setValueAt(value-1, rowNum, jtable.getColumnCount()-1);;
+                System.out.println(items + " " +map.get(item) + " " + jtable.getValueAt(rowNum, 2));
+            }
+        }
     }
 }
