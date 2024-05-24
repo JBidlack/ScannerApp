@@ -42,7 +42,8 @@ public class Scanner {
                 }
             });
 
-
+            
+           
 
         } catch (SecurityException e) {
             // TODO Auto-generated catch block
@@ -56,6 +57,16 @@ public class Scanner {
     public UsbDevice retryFind(){
 
         findDevice(root);
+        return null;
+    }
+
+    private static UsbEndpoint getEndpoint(UsbInterface usb){
+        for (UsbEndpoint endpoint: (List<UsbEndpoint>) usb.getUsbEndpoints()){
+            byte endpointAddress = endpoint.getUsbEndpointDescriptor().bEndpointAddress();
+            if((endpointAddress & 0x80) != 0){
+                return endpoint;
+            }
+        }
         return null;
     }
 
