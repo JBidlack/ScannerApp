@@ -53,6 +53,7 @@ public class Window extends JFrame{
     /**
 	 * 
 	 */
+    // private static ProcessSelection p = new ProcessSelection();
 	private static final long serialVersionUID = 1L;
 
 	public Window(){
@@ -74,7 +75,7 @@ public class Window extends JFrame{
         this.getContentPane().add(panelLayout(), BorderLayout.CENTER);
         
         // setContentPane(panelLayout());
-        // this.pack();
+        this.pack();
         this.setVisible(true);
     }
 
@@ -142,7 +143,9 @@ public class Window extends JFrame{
         
 
         scanInfo.addActionListener(e -> {
-            
+            String text = scanInfo.getText();
+            ProcessSelection.search(text);
+
         });
         buttPan.add(Box.createRigidArea(new Dimension(100, 40)));
         buttPan.add(undo);

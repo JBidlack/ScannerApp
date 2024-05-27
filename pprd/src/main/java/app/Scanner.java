@@ -2,11 +2,16 @@ package app;
 
 import java.util.List;
 
+import javax.usb.UsbConfiguration;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
+import javax.usb.UsbEndpoint;
 import javax.usb.UsbException;
 import javax.usb.UsbHostManager;
 import javax.usb.UsbHub;
+import javax.usb.UsbInterface;
+import javax.usb.UsbInterfacePolicy;
+import javax.usb.UsbPipe;
 import javax.usb.UsbServices;
 
 public class Scanner {
@@ -14,6 +19,10 @@ public class Scanner {
     private static final short PID = 0x4EE7;
     protected static UsbDevice scanner = null;
     private static UsbHub root = null;
+    private static UsbConfiguration configuration = null;
+    private static UsbEndpoint endpoint = null;
+    private static UsbInterface usbInterface = null;
+    private static UsbPipe pipe = null;
 
     public Scanner(){
         try {
@@ -23,7 +32,18 @@ public class Scanner {
 
             scanner = findDevice(root);
 
-            // scanner.addUsbDeviceListener(l -> );
+            configuration = scanner.getActiveUsbConfiguration();
+            usbInterface = configuration.getUsbInterface((byte) 0);
+
+            usbInterface.claim(new UsbInterfacePolicy() {
+                @Override
+                public boolean forceClaim(UsbInterface usbInterface) {
+                    return true;
+                }
+            });
+
+            
+           
 
         } catch (SecurityException e) {
             // TODO Auto-generated catch block
@@ -37,6 +57,16 @@ public class Scanner {
     public UsbDevice retryFind(){
 
         findDevice(root);
+        return null;
+    }
+
+    private static UsbEndpoint getEndpoint(UsbInterface usb){
+        for (UsbEndpoint endpoint: (List<UsbEndpoint>) usb.getUsbEndpoints()){
+            byte endpointAddress = endpoint.getUsbEndpointDescriptor().bEndpointAddress();
+            if((endpointAddress & 0x80) != 0){
+                return endpoint;
+            }
+        }
         return null;
     }
 
