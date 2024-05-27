@@ -74,7 +74,6 @@ public class Window extends JFrame{
         this.getContentPane().setLayout(new BorderLayout());
         this.getContentPane().add(panelLayout(), BorderLayout.CENTER);
         
-        // setContentPane(panelLayout());
         this.pack();
         this.setVisible(true);
     }
@@ -118,7 +117,7 @@ public class Window extends JFrame{
             }
         });
         quit.addActionListener(e -> {
-            System.exit(0);
+            closeProgram();
         });
         return menu;
     }
@@ -205,6 +204,11 @@ public class Window extends JFrame{
             panel.revalidate();
             panel.repaint();
         }
+    }
+
+    private static void closeProgram(){
+        Scanner.closePipe();
+        System.exit(0);
     }
 
     public JPanel getPanel() {

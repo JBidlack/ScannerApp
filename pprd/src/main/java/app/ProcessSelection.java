@@ -39,12 +39,6 @@ public class ProcessSelection {
         processFile(excel, panel);
     }
 
-    // public void clearTable(JPanel panel){
-    //     if(jtable != null){
-    //         jtable = null;
-    //     }
-    // }
-
     private void processFile(File excel, JPanel panel){
         
         Workbook book = null;
@@ -72,83 +66,74 @@ public class ProcessSelection {
     }
 
     private void createTable(Sheet sheet, JPanel panel){
-        int counter = 0;
+        int headerIndex = findHeader(sheet);
         map = new HashMap<>();
         Row header = null;
 
-        // if(jtable != null){
-        //     jtable.removeAll();
-        // }
-
-        for (Row row: sheet){
-            if(row.getLastCellNum() > 1){
-                header = row;
-                break;
-            }
-            else{
-                counter++;
-            }
-        }
-        
-        if(header == null){
+        if(headerIndex == -1){
             System.err.println("No header found");
             return;
-        }else{
-            int rows = sheet.getPhysicalNumberOfRows()-(counter+1);
-            int cols = header.getPhysicalNumberOfCells();
+        }
+        
+        header = sheet.getRow(headerIndex);
+        int rows = sheet.getPhysicalNumberOfRows()-(headerIndex+1);
+        int cols = header.getPhysicalNumberOfCells();
 
-            String[][] storage = new String[rows][cols];
+        String[][] storage = new String[rows][cols];
 
-            int headerRow = (header == null) ? 0 : header.getRowNum();
+        int headerRow = (header == null) ? 0 : header.getRowNum();
 
-            for (int i = headerRow+2; i < sheet.getLastRowNum()-1; i++){
-                Row nextRow = sheet.getRow(i); 
+        for (int i = headerRow+1; i < sheet.getLastRowNum(); i++){
+            Row nextRow = sheet.getRow(i); 
 
-                for (int j = 0; j<cols; j++){
-                    Cell cell = nextRow.getCell(j);
-
-                    if(cell != null){
-                        storage[i-(headerRow+2)][j] = cellCheck(cell);
-                    }
-                    else{
-                        storage[i-(headerRow+2)][j] = "";
-                    }
-                }
+            for (int j = 0; j<cols; j++){
+                Cell cell = nextRow.getCell(j);
+                storage[i-(headerRow+1)][j] = cell != null ? cellCheck(cell) : "";
             }
+        }
 
-            jtable = new JTable();
-            String[] head = new String[cols];
+        String[] head = new String[cols];
 
-            for (int a = 0; a < cols; a++){
-                head[a] = header.getCell(a).toString();
+        for (int a = 0; a < cols; a++){
+            head[a] = header.getCell(a).toString();
+        }
+
+        DefaultTableModel model = new DefaultTableModel(storage, head){
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
             }
-            DefaultTableModel model = new DefaultTableModel(storage, head){
-                @Override
-                public boolean isCellEditable(int row, int column){
-                    return false;
-                }
-            };
-            jtable.setModel(model); 
+        };
 
-            for (int r = 0; r< jtable.getRowCount(); r++){
-                String value = String.valueOf(jtable.getValueAt(r, 1));
-                if(jtable.getValueAt(r, 1) != ""){
-                    map.put(value, r);
-                }
+        jtable = new JTable(model); 
+
+        createMap();
+        
+        JScrollPane scroll = new JScrollPane(jtable);
+        
+        scroll.setSize(new Dimension(((panel.getWidth())/3)*2, (panel.getHeight()/3)*2));
+        
+        panel.add(scroll, BorderLayout.CENTER);
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    private int findHeader(Sheet sheet){
+        for (Row row: sheet){
+            if(row.getLastCellNum() > 1){
+                return row.getRowNum();
             }
-            
-            
-            JScrollPane scroll = new JScrollPane();
-            scroll.add(jtable);
-            scroll.setViewportView(jtable);
-            
-            scroll.setSize(new Dimension(((panel.getWidth())/3)*2, (panel.getHeight()/3)*2));
-            // jtable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            
-            panel.add(scroll, BorderLayout.CENTER);
-            // panel.add(jtable, BorderLayout.CENTER);
-            panel.revalidate();
-            panel.repaint();
+        }
+        return -1;
+    }
+
+    private void createMap(){
+        map.clear();
+        for (int r = 0; r< jtable.getRowCount(); r++){
+            String value = String.valueOf(jtable.getValueAt(r, 1));
+            if(jtable.getValueAt(r, 1) != ""){
+                map.put(value, r);
+            }
         }
     }
 
@@ -170,7 +155,6 @@ public class ProcessSelection {
         else{
             check = cell.toString();
         }
-
         return check;
     }
 
