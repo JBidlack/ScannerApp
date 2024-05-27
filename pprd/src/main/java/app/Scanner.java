@@ -1,16 +1,20 @@
 package app;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import javax.usb.UsbConfiguration;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
+import javax.usb.UsbDisconnectedException;
 import javax.usb.UsbEndpoint;
 import javax.usb.UsbException;
 import javax.usb.UsbHostManager;
 import javax.usb.UsbHub;
 import javax.usb.UsbInterface;
 import javax.usb.UsbInterfacePolicy;
+import javax.usb.UsbNotActiveException;
+import javax.usb.UsbNotOpenException;
 import javax.usb.UsbPipe;
 import javax.usb.UsbServices;
 
@@ -32,33 +36,60 @@ public class Scanner {
 
             scanner = findDevice(root);
 
-            configuration = scanner.getActiveUsbConfiguration();
-            usbInterface = configuration.getUsbInterface((byte) 0);
+            if(scanner != null){
+                configuration = scanner.getActiveUsbConfiguration();
+                usbInterface = configuration.getUsbInterface((byte) 0);
 
-            usbInterface.claim(new UsbInterfacePolicy() {
-                @Override
-                public boolean forceClaim(UsbInterface usbInterface) {
-                    return true;
+                usbInterface.claim(new UsbInterfacePolicy() {
+                    @Override
+                    public boolean forceClaim(UsbInterface usbInterface) {
+                        return true;
+                    }
+                });
+
+                endpoint = getEndpoint(usbInterface);
+
+                if(endpoint != null){
+                    pipe = endpoint.getUsbPipe();
+                    pipe.open();
+
+                    while (pipe.isOpen()){
+                        byte[] data = new byte[64];
+                        int received = pipe.syncSubmit(data);
+
+                        String result = new String(data, 0, received, "UTF-8");
+                        System.out.println(result);
+
+                    }
                 }
-            });
-
-            
-           
-
+            }
         } catch (SecurityException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (UsbException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         
     }
-    public UsbDevice retryFind(){
+    public static UsbDevice retryFind(){
 
         findDevice(root);
         return null;
     }
+
+    public static void closePipe(){
+        try {
+            if(pipe != null || pipe.isOpen()){
+                pipe.close();
+            }
+        } catch (UsbNotActiveException | UsbNotOpenException | UsbDisconnectedException | UsbException e) {
+            e.printStackTrace();
+        }
+    } 
 
     private static UsbEndpoint getEndpoint(UsbInterface usb){
         for (UsbEndpoint endpoint: (List<UsbEndpoint>) usb.getUsbEndpoints()){
