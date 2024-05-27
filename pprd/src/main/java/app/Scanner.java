@@ -31,17 +31,17 @@ public class Scanner {
             root = service.getRootUsbHub();
 
             scanner = findDevice(root);
+            if(scanner != null){
+                configuration = scanner.getActiveUsbConfiguration();
+                usbInterface = configuration.getUsbInterface((byte) 0);
 
-            configuration = scanner.getActiveUsbConfiguration();
-            usbInterface = configuration.getUsbInterface((byte) 0);
-
-            usbInterface.claim(new UsbInterfacePolicy() {
-                @Override
-                public boolean forceClaim(UsbInterface usbInterface) {
-                    return true;
-                }
-            });
-
+                usbInterface.claim(new UsbInterfacePolicy() {
+                    @Override
+                    public boolean forceClaim(UsbInterface usbInterface) {
+                        return true;
+                    }
+                });
+            }
             
            
 
