@@ -16,6 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.usb.UsbDisconnectedException;
+import javax.usb.UsbException;
+import javax.usb.UsbNotActiveException;
+import javax.usb.UsbNotOpenException;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -172,6 +176,25 @@ public class ProcessSelection {
                 int value = Integer.valueOf(String.valueOf(items));
                 jtable.setValueAt(value-1, rowNum, jtable.getColumnCount()-1);;
                 System.out.println(items + " " +map.get(item) + " " + jtable.getValueAt(rowNum, 2));
+            }
+        }
+    }
+
+    private static void printItem(){
+        if (Scanner.scanner != null){
+            byte[] data = new byte[64];
+            int received;
+            try {
+                received = Scanner.pipe.syncSubmit(data);
+                
+                if (received > 0) {
+                    String scannedData = new String(data, 0, received);
+                    System.out.println(scannedData);
+                }
+            } catch (UsbNotActiveException | UsbNotOpenException | IllegalArgumentException | UsbDisconnectedException
+            | UsbException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
     }

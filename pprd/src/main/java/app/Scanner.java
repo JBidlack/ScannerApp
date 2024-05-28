@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import javax.usb.UsbConfiguration;
+import javax.usb.UsbConst;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbDisconnectedException;
@@ -17,6 +18,9 @@ import javax.usb.UsbNotActiveException;
 import javax.usb.UsbNotOpenException;
 import javax.usb.UsbPipe;
 import javax.usb.UsbServices;
+import javax.usb.event.UsbPipeDataEvent;
+import javax.usb.event.UsbPipeErrorEvent;
+import javax.usb.event.UsbPipeListener;
 
 public class Scanner {
     private static final short VID = 0x18D1;
@@ -26,7 +30,7 @@ public class Scanner {
     private static UsbConfiguration configuration = null;
     private static UsbEndpoint endpoint = null;
     private static UsbInterface usbInterface = null;
-    private static UsbPipe pipe = null;
+    public static UsbPipe pipe = null;
 
     public Scanner(){
         try {
@@ -36,31 +40,50 @@ public class Scanner {
 
             scanner = findDevice(root);
 
+            // printDeviceInfo(scanner);
+
             if(scanner != null){
                 configuration = scanner.getActiveUsbConfiguration();
                 usbInterface = configuration.getUsbInterface((byte) 0);
 
-                usbInterface.claim(new UsbInterfacePolicy() {
-                    @Override
-                    public boolean forceClaim(UsbInterface usbInterface) {
-                        return true;
-                    }
-                });
+                usbInterface.claim(usbInterface1 -> true);
 
                 endpoint = getEndpoint(usbInterface);
 
+                System.out.println(endpoint);
                 if(endpoint != null){
                     pipe = endpoint.getUsbPipe();
-                    pipe.open();
+                    pipe.open(); 
 
-                    while (pipe.isOpen()){
-                        byte[] data = new byte[64];
-                        int received = pipe.syncSubmit(data);
+                    System.out.println(pipe);
+                    
+                    // Start a thread to continuously read data
+Thread readThread = new Thread(() -> {
+    try {
+        while (true) {
+            byte[] data = new byte[64]; // Adjust size as needed
+            int received = pipe.syncSubmit(data);
+            if (received > 0) {
+                String scannedData = new String(data, 0, received, "UTF-8").trim();
+                System.out.println("Received Data: " + scannedData); // Print received data
+               
+            }
+        }
+    } catch (UsbException | UnsupportedEncodingException e) {
+        e.printStackTrace();
+    }
+});
 
-                        String result = new String(data, 0, received, "UTF-8");
-                        System.out.println(result);
+                    readThread.start();
 
-                    }
+                    // Runtime.getRuntime().addShutdownHook(new Thread(() ->{
+                    //     try{
+                    //         pipe.close();
+                    //         usbInterface.release();
+                    //     }catch (UsbException e){
+                    //         e.printStackTrace();
+                    //     }
+                    // }));
                 }
             }
         } catch (SecurityException e) {
@@ -69,21 +92,16 @@ public class Scanner {
         } catch (UsbException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
-        
     }
     public static UsbDevice retryFind(){
-
         findDevice(root);
         return null;
     }
 
     public static void closePipe(){
         try {
-            if(pipe != null || pipe.isOpen()){
+            if(pipe != null && pipe.isOpen()){
                 pipe.close();
             }
         } catch (UsbNotActiveException | UsbNotOpenException | UsbDisconnectedException | UsbException e) {
@@ -91,6 +109,13 @@ public class Scanner {
         }
     } 
 
+    private void translate(String b){
+        // Translate the scanned data here
+        System.out.println("Scanned Data: " + b);
+        
+    }
+
+    @SuppressWarnings("unchecked")
     private static UsbEndpoint getEndpoint(UsbInterface usb){
         for (UsbEndpoint endpoint: (List<UsbEndpoint>) usb.getUsbEndpoints()){
             byte endpointAddress = endpoint.getUsbEndpointDescriptor().bEndpointAddress();
@@ -117,11 +142,20 @@ public class Scanner {
 
                 if(desc.idVendor() == VID && desc.idProduct() == PID){
                     scanner = device;
-                    break;
+                    return scanner;
                 }
             }
 
         }
         return null;
     }  
+
+    // private static UsbEndpoint getEndpoint(UsbInterface usbInterface, byte type, byte direction) {
+    //     for (UsbEndpoint endpoint : (List<UsbEndpoint>) usbInterface.getUsbEndpoints()) {
+    //         if (endpoint.getType() == type && endpoint.getDirection() == direction) {
+    //             return endpoint;
+    //         }
+    //     }
+    //     return null;
+    // }
 }
