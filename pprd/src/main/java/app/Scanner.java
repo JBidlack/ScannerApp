@@ -1,6 +1,10 @@
 package app;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.ServerSocket;
 import java.util.List;
 
 import javax.usb.UsbConfiguration;
@@ -30,10 +34,12 @@ public class Scanner {
     private static UsbConfiguration configuration = null;
     private static UsbEndpoint endpoint = null;
     private static UsbInterface usbInterface = null;
-    public static UsbPipe pipe = null;
+    private static UsbPipe pipe = null;
+    private final int port = 00000;
 
     public Scanner(){
-        try {
+        BufferedReader br = null;
+        try (ServerSocket serverSocket = new ServerSocket(port)){
             UsbServices service = UsbHostManager.getUsbServices();
 
             root = service.getRootUsbHub();
@@ -54,27 +60,27 @@ public class Scanner {
                 if(endpoint != null){
                     pipe = endpoint.getUsbPipe();
                     pipe.open(); 
+                    br = new BufferedReader(new InputStreamReader(null));
 
-                    System.out.println(pipe);
                     
                     // Start a thread to continuously read data
-Thread readThread = new Thread(() -> {
-    try {
-        while (true) {
-            byte[] data = new byte[64]; // Adjust size as needed
-            int received = pipe.syncSubmit(data);
-            if (received > 0) {
-                String scannedData = new String(data, 0, received, "UTF-8").trim();
-                System.out.println("Received Data: " + scannedData); // Print received data
+// Thread readThread = new Thread(() -> {
+//     try {
+//         while (true) {
+//             byte[] data = new byte[64]; // Adjust size as needed
+//             int received = pipe.syncSubmit(data);
+//             if (received > 0) {
+//                 String scannedData = new String(data, 0, received, "UTF-8").trim();
+//                 System.out.println("Received Data: " + scannedData); // Print received data
                
-            }
-        }
-    } catch (UsbException | UnsupportedEncodingException e) {
-        e.printStackTrace();
-    }
-});
+//             }
+//         }
+//     } catch (UsbException | UnsupportedEncodingException e) {
+//         e.printStackTrace();
+//     }
+// });
 
-                    readThread.start();
+                    // readThread.start();
 
                     // Runtime.getRuntime().addShutdownHook(new Thread(() ->{
                     //     try{
