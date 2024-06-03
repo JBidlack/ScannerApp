@@ -18,13 +18,17 @@ import javax.usb.UsbNotActiveException;
 import javax.usb.UsbNotOpenException;
 import javax.usb.UsbPipe;
 import javax.usb.UsbServices;
+import javax.usb.event.UsbDeviceDataEvent;
+import javax.usb.event.UsbDeviceErrorEvent;
+import javax.usb.event.UsbDeviceEvent;
+import javax.usb.event.UsbDeviceListener;
 import javax.usb.event.UsbPipeDataEvent;
 import javax.usb.event.UsbPipeErrorEvent;
 import javax.usb.event.UsbPipeListener;
 
 public class Scanner {
-    private static final short VID = 0x18D1;
-    private static final short PID = 0x4EE7;
+    private static final short VID = 0x18d1;
+    private static final short PID = 0x4ee1;
     protected static UsbDevice scanner = null;
     private static UsbHub root = null;
     private static UsbConfiguration configuration = null;
@@ -46,16 +50,53 @@ public class Scanner {
                 configuration = scanner.getActiveUsbConfiguration();
                 usbInterface = configuration.getUsbInterface((byte) 0);
 
+                
                 usbInterface.claim(usbInterface1 -> true);
+                // scanner.addUsbDeviceListener(new UsbDeviceListener() {
 
+                //     @Override
+                //     public void dataEventOccurred(UsbDeviceDataEvent arg0) {
+                //         byte[] data = new byte[64]; // Adjust size as needed
+                //         int received;
+                //         try {
+                //             received = pipe.syncSubmit(data);
+                            
+                //             if (received > 0) {
+                //                 String scannedData = new String(data, 0, received, "UTF-8").trim();
+                //                 System.out.println("Received Data: " + scannedData); // Print received data
+                            
+                //             }
+                //         } catch (UsbNotActiveException | UsbNotOpenException | IllegalArgumentException
+                //             | UsbDisconnectedException | UsbException e) {
+                //         // TODO Auto-generated catch block
+                //             e.printStackTrace();
+                //         }
+                //         catch(UnsupportedEncodingException uee){
+                //             uee.printStackTrace();
+                //         }
+                //     }
+
+
+                //     @Override
+                //     public void errorEventOccurred(UsbDeviceErrorEvent arg0) {
+                //         // TODO Auto-generated method stub
+                //         throw new UnsupportedOperationException("Unimplemented method 'errorEventOccurred'");
+                //     }
+
+                //     @Override
+                //     public void usbDeviceDetached(UsbDeviceEvent arg0) {
+                //         // TODO Auto-generated method stub
+                //         throw new UnsupportedOperationException("Unimplemented method 'usbDeviceDetached'");
+                //     }
+                    
+                // });
+                // System.out.println(device);
                 endpoint = getEndpoint(usbInterface);
 
-                System.out.println(endpoint);
                 if(endpoint != null){
                     pipe = endpoint.getUsbPipe();
                     pipe.open(); 
-
-                    System.out.println(pipe);
+                    pipe.addUsbPipeListener(new PipeListener());
                     
                     // Start a thread to continuously read data
 Thread readThread = new Thread(() -> {
@@ -76,14 +117,14 @@ Thread readThread = new Thread(() -> {
 
                     readThread.start();
 
-                    // Runtime.getRuntime().addShutdownHook(new Thread(() ->{
-                    //     try{
-                    //         pipe.close();
-                    //         usbInterface.release();
-                    //     }catch (UsbException e){
-                    //         e.printStackTrace();
-                    //     }
-                    // }));
+                    Runtime.getRuntime().addShutdownHook(new Thread(() ->{
+                        try{
+                            pipe.close();
+                            usbInterface.release();
+                        }catch (UsbException e){
+                            e.printStackTrace();
+                        }
+                    }));
                 }
             }
         } catch (SecurityException e) {
@@ -139,9 +180,10 @@ Thread readThread = new Thread(() -> {
             }
             else{
                 UsbDeviceDescriptor desc = device.getUsbDeviceDescriptor();
-
+                System.out.println(desc);
                 if(desc.idVendor() == VID && desc.idProduct() == PID){
                     scanner = device;
+                    System.out.println(scanner);
                     return scanner;
                 }
             }
