@@ -16,6 +16,7 @@ public class Bluetooth {
     private static StreamConnection connection;
     
     public Bluetooth(){
+        makeConnection();
     }
 
     public static void makeConnection(){
@@ -23,12 +24,26 @@ public class Bluetooth {
             localDevice = LocalDevice.getLocalDevice();
             localDevice.setDiscoverable(DiscoveryAgent.GIAC);
 
-            UUID uuid = UUID.fromString(SERVER_UUID);
+            UUID uuid = UUID.randomUUID();//.fromString(SERVER_UUID);
+            System.out.println("UUID: " + uuid);
             String url = "btspp://localhost:" + uuid.toString() + ";name=" + SERVER_NAME;
 
             notifier = (StreamConnectionNotifier) Connector.open(url);
             connection = notifier.acceptAndOpen(); 
 
+            InputStream input = connection.openInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            String number;
+            while((number = reader.readLine())!= null){
+                System.out.println(number);
+            }
+            
+            input.close();
+            reader.close();
+            connection.close();
+            notifier.close();
+
+            
         } catch (BluetoothStateException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
