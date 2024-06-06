@@ -1,11 +1,8 @@
 package app;
 
 import javax.bluetooth.*;
-// import javax.bluetooth.DiscoveryAgent;
-// import javax.bluetooth.LocalDevice;
 import javax.microedition.io.*;
 import java.io.*;
-// import javax.microedition.io.StreamConnectionNotifier;
 import java.util.UUID;
 
 public class Bluetooth {
@@ -14,36 +11,42 @@ public class Bluetooth {
     private static LocalDevice localDevice;
     private static StreamConnectionNotifier notifier;
     private static StreamConnection connection;
+    private static InputStream input = null;
+    private static BufferedReader reader = null;
     
     public Bluetooth(){
+        
+    }
+
+    public static void start(){
         makeConnection();
     }
 
-    public static void makeConnection(){
+    private static void makeConnection(){
         try {
             localDevice = LocalDevice.getLocalDevice();
             localDevice.setDiscoverable(DiscoveryAgent.GIAC);
 
             UUID uuid = UUID.randomUUID();//.fromString(SERVER_UUID);
             System.out.println("UUID: " + uuid);
-            String url = "btspp://localhost:" + uuid.toString() + ";name=" + SERVER_NAME;
+            String url = "btspp://b4:29:3d:5e:3b:88:1;authenticate=false;encrypt=false;master=false";
 
             notifier = (StreamConnectionNotifier) Connector.open(url);
-            connection = notifier.acceptAndOpen(); 
+            new Thread(() -> {
+                try{
+                    connection = notifier.acceptAndOpen(); 
 
-            InputStream input = connection.openInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-            String number;
-            while((number = reader.readLine())!= null){
-                System.out.println(number);
-            }
-            
-            input.close();
-            reader.close();
-            connection.close();
-            notifier.close();
-
-            
+                    input = connection.openInputStream();
+                    reader = new BufferedReader(new InputStreamReader(input));
+                    String number;
+                    while((number = reader.readLine())!= null){
+                        System.out.println(number);
+                    }
+                } catch(IOException ioe){
+                    ioe.printStackTrace();
+                }
+            }).start();
+   
         } catch (BluetoothStateException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -52,5 +55,25 @@ public class Bluetooth {
             e.printStackTrace();
         }
         
+    }
+
+    public void stop(){
+        try {
+            if(input != null){
+                input.close();
+            }
+            if(reader != null){
+                reader.close();
+            }
+            if(connection != null){
+                connection.close();
+            }
+            if(notifier != null){
+                notifier.close();
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

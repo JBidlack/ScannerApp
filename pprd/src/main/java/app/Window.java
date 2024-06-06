@@ -47,8 +47,10 @@ public class Window extends JFrame{
     private JPanel inputPan = null;
     private JPanel notice = null;
     public File importFile = null;
+    private Bluetooth bt = null;
+    private JTextField scanInfo = null;
 
-    private Scanner device = new Scanner();
+    // private Scanner device = new Scanner();
     // private UsbDevice scanner =null;
     /**
 	 * 
@@ -57,10 +59,11 @@ public class Window extends JFrame{
 	private static final long serialVersionUID = 1L;
 
 	public Window(){
-        
+        bt = new Bluetooth();
     }
     public void setup(){
         setupMain();
+        bt.start();
     }
 
     private void setupMain(){
@@ -101,19 +104,7 @@ public class Window extends JFrame{
             JLabel label = new JLabel("No Device Connected", JLabel.CENTER);
             importFile = openFile();
             if (importFile != null){
-                if(device.scanner == null){
-                    while(attempt <= 3 && device.scanner == null){
-                        device.retryFind();
-                        attempt++;
-                    }
-                    notice.removeAll();
-                    notice.add(label);
-                    p.process(importFile, panel);
-                }
-                if(Scanner.scanner != null){
-                    // ProcessSelection p = new ProcessSelection();
-                    p.process(importFile, panel);
-                }
+                p.process(importFile, panel);
             }
         });
         quit.addActionListener(e -> {
@@ -126,19 +117,22 @@ public class Window extends JFrame{
         buttPan = new JPanel();
         inputPan = new JPanel();
         notice = new JPanel();
-        device.retryFind();
+        scanInfo = new JTextField(20);
         
         JLabel scanLabel = new JLabel("Scanned Tag: ");
-        JTextField scanInfo = new JTextField(20);
         JButton undo = new JButton("Undo");
         JButton expButton = new JButton("Export");
-
+        JButton conn = new JButton("Connect");
         buttPan.setLayout(new BoxLayout(buttPan, BoxLayout.Y_AXIS));
         inputPan.setLayout(new BoxLayout(inputPan, BoxLayout.X_AXIS));
         notice.setLayout(new BoxLayout(notice, BoxLayout.X_AXIS));
         // scanInfo.setm
         inputPan.add(scanLabel);
         inputPan.add(scanInfo);
+
+        conn.addActionListener(e -> {
+            new Thread(() -> connection());
+        });
         
 
         scanInfo.addActionListener(e -> {
@@ -150,6 +144,8 @@ public class Window extends JFrame{
         buttPan.add(undo);
         buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
         buttPan.add(expButton);
+        buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
+        buttPan.add(conn);
         buttPan.add(Box.createRigidArea(new Dimension(100, 10)));
 
         undo.setAlignmentX(CENTER_ALIGNMENT);
@@ -197,17 +193,18 @@ public class Window extends JFrame{
     }
 
     private void noDeviceFound(){
+        JLabel label = new JLabel("No Device Found", JLabel.CENTER);
+        notice.add(label);
+        panel.revalidate();
+        panel.repaint();
+    }
 
-        if(device.scanner == null){
-            JLabel label = new JLabel("No Device Found", JLabel.CENTER);
-            notice.add(label);
-            panel.revalidate();
-            panel.repaint();
-        }
+    private void connection(){
+        Bluetooth blue = new Bluetooth();
+        blue.start();
     }
 
     private static void closeProgram(){
-        Scanner.closePipe();
         System.exit(0);
     }
 
@@ -217,4 +214,5 @@ public class Window extends JFrame{
     public void setPanel(JPanel panel) {
         this.panel = panel;
     }
+    
 }
