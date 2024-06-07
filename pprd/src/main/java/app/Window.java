@@ -21,6 +21,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
@@ -29,9 +30,11 @@ import javax.usb.UsbDevice;
 import org.apache.logging.log4j.simple.SimpleLogger;
 import org.apache.logging.log4j.util.PropertiesUtil;
 
+import app.Bluetooth.BluetoothConnectionListener;
 
 
-public class Window extends JFrame{
+
+public class Window extends JFrame implements BluetoothConnectionListener{
 
     private SimpleLogger log = new SimpleLogger("log", null, true, true, true, true, "MM-DD-YYYY", null, PropertiesUtil.getProperties(), null);
     private Dimension screensize    = Toolkit.getDefaultToolkit( ).getScreenSize( );
@@ -59,7 +62,7 @@ public class Window extends JFrame{
 	private static final long serialVersionUID = 1L;
 
 	public Window(){
-        bt = new Bluetooth();
+        bt = new Bluetooth(this);
     }
     public void setup(){
         setupMain();
@@ -131,7 +134,7 @@ public class Window extends JFrame{
         inputPan.add(scanInfo);
 
         conn.addActionListener(e -> {
-            new Thread(() -> connection());
+            connection();
         });
         
 
@@ -156,7 +159,6 @@ public class Window extends JFrame{
         panel.add(notice, BorderLayout.SOUTH);
         panel.add(buttPan, BorderLayout.EAST);
         panel.setPreferredSize(new Dimension(initialW, initialH));
-        noDeviceFound();
 
         // panel.repaint();
 
@@ -200,8 +202,7 @@ public class Window extends JFrame{
     }
 
     private void connection(){
-        Bluetooth blue = new Bluetooth();
-        blue.start();
+        bt.start();
     }
 
     private static void closeProgram(){
@@ -213,6 +214,14 @@ public class Window extends JFrame{
     }
     public void setPanel(JPanel panel) {
         this.panel = panel;
+    }
+    @Override
+    public void onDataReceoved(String data) {
+        SwingUtilities.invokeLater(() -> scanInfo.setText(data));
+    }
+    @Override
+    public void onError(String errorMsg) {
+        SwingUtilities.invokeLater(() -> scanInfo.setText(errorMsg));
     }
     
 }

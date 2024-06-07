@@ -13,9 +13,10 @@ public class Bluetooth {
     private static StreamConnection connection;
     private static InputStream input = null;
     private static BufferedReader reader = null;
+    private BluetoothConnectionListener listener;
     
-    public Bluetooth(){
-        
+    public Bluetooth(BluetoothConnectionListener listener){
+        this.listener = listener;
     }
 
     public static void start(){
@@ -75,5 +76,12 @@ public class Bluetooth {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public interface BluetoothConnectionListener {
+        void onDataReceoved(String data);
+        void onError(String errorMsg);
+    
+        
     }
 }
