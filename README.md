@@ -1,0 +1,1 @@
+This was meant to be, and still may be an application to link a barcode scanner to check off items from an inventory list. During testing, the scanner I was asked to use was needed and has not yet been returned
